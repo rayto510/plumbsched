@@ -36,6 +36,30 @@ class JobListAPITests(APITestCase):
         self.assertEqual(response.data[0]['customer_name'], "Bob")  # Because of order_by descending scheduled_time
         self.assertEqual(response.data[1]['customer_name'], "Alice")
 
+class JobDetailAPITests(APITestCase):
+
+    def setUp(self):
+        self.job = Job.objects.create(
+            customer_name="Eve",
+            customer_phone="555-123-4567",
+            address="789 Pine St",
+            description="Fix leaking pipe",
+            scheduled_time="2025-06-10T14:00:00Z"
+        )
+
+    def test_get_job_details_success(self):
+        url = reverse('get_job_details', kwargs={'pk': self.job.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['customer_name'], self.job.customer_name)
+        self.assertEqual(response.data['description'], self.job.description)
+
+    def test_get_job_details_not_found(self):
+        url = reverse('get_job_details', kwargs={'pk': 9999})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn('error', response.data)
+
 class JobAPITests(APITestCase):
     def test_create_job(self):
         url = reverse('create_job')

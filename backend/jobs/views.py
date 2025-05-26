@@ -18,6 +18,16 @@ def list_jobs(request):
     serializer = JobSerializer(jobs, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+@api_view(['GET'])
+def get_job_details(request, pk):
+    try:
+        job = Job.objects.get(pk=pk)
+    except Job.DoesNotExist:
+        return Response({'error': 'Job not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = JobSerializer(job)
+    return Response(serializer.data)
+
 @api_view(['DELETE'])
 def delete_job(request, pk):
     try:
