@@ -1,12 +1,10 @@
-FROM node:18
+FROM node:24-slim
 
 WORKDIR /app
 
-COPY frontend/package.json frontend/package-lock.json* /app/
+COPY frontend/package*.json ./
 RUN npm install
 
-COPY frontend/ /app/
-
-EXPOSE 19000 19001 19002
+COPY frontend .
 
 CMD ["npx", "expo", "start", "--tunnel"]
