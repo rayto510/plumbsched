@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-class Job(models.Model):
+class Appointment(models.Model):
     customer_name = models.CharField(max_length=255)
     customer_phone = models.CharField(max_length=20)
     address = models.TextField()
@@ -10,4 +10,4 @@ class Job(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Job for {self.customer_name} at {self.address}"
+        return f"Appointment for {self.customer_name} at {self.address}"

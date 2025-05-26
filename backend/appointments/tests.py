@@ -1,20 +1,20 @@
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from .models import Job
+from .models import Appointment
 
-class JobListAPITests(APITestCase):
+class AppointmentListAPITests(APITestCase):
 
     def setUp(self):
-        # Create some sample jobs to list
-        Job.objects.create(
+        # Create some sample appointments to list
+        Appointment.objects.create(
             customer_name="Alice",
             customer_phone="111-222-3333",
             address="100 Main St",
             description="Fix sink",
             scheduled_time="2025-06-01T09:00:00Z"
         )
-        Job.objects.create(
+        Appointment.objects.create(
             customer_name="Bob",
             customer_phone="444-555-6666",
             address="200 Oak Ave",
@@ -22,24 +22,24 @@ class JobListAPITests(APITestCase):
             scheduled_time="2025-06-02T10:00:00Z"
         )
 
-    def test_list_jobs(self):
-        url = reverse('list_jobs')
+    def test_list_appointments(self):
+        url = reverse('list_appointments')
         response = self.client.get(url, format='json')
 
         # Should return 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        # Should return 2 jobs
+        # Should return 2 appointments
         self.assertEqual(len(response.data), 2)
 
-        # Check one job's customer_name
+        # Check one appointment's customer_name
         self.assertEqual(response.data[0]['customer_name'], "Bob")  # Because of order_by descending scheduled_time
         self.assertEqual(response.data[1]['customer_name'], "Alice")
 
-class JobDetailAPITests(APITestCase):
+class AppointmentDetailAPITests(APITestCase):
 
     def setUp(self):
-        self.job = Job.objects.create(
+        self.appointment = Appointment.objects.create(
             customer_name="Eve",
             customer_phone="555-123-4567",
             address="789 Pine St",
@@ -47,22 +47,22 @@ class JobDetailAPITests(APITestCase):
             scheduled_time="2025-06-10T14:00:00Z"
         )
 
-    def test_get_job_details_success(self):
-        url = reverse('get_job_details', kwargs={'pk': self.job.pk})
+    def test_get_appointment_details_success(self):
+        url = reverse('get_appointment_details', kwargs={'pk': self.appointment.pk})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['customer_name'], self.job.customer_name)
-        self.assertEqual(response.data['description'], self.job.description)
+        self.assertEqual(response.data['customer_name'], self.appointment.customer_name)
+        self.assertEqual(response.data['description'], self.appointment.description)
 
-    def test_get_job_details_not_found(self):
-        url = reverse('get_job_details', kwargs={'pk': 9999})
+    def test_get_appointment_details_not_found(self):
+        url = reverse('get_appointment_details', kwargs={'pk': 9999})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn('error', response.data)
 
-class JobAPITests(APITestCase):
-    def test_create_job(self):
-        url = reverse('create_job')
+class AppointmentAPITests(APITestCase):
+    def test_create_appointment(self):
+        url = reverse('create_appointment')
         data = {
             "customer_name": "John Doe",
             "customer_phone": "555-1234",
@@ -82,14 +82,14 @@ class JobAPITests(APITestCase):
         self.assertEqual(response.data['description'], data['description'])
         self.assertEqual(response.data['scheduled_time'], data['scheduled_time'])
 
-        # Assert the job was created in the database
-        from .models import Job
-        self.assertEqual(Job.objects.count(), 1)
-        job = Job.objects.first()
-        self.assertEqual(job.customer_name, data['customer_name'])
+        # Assert the appointment was created in the database
+        from .models import Appointment
+        self.assertEqual(Appointment.objects.count(), 1)
+        appointment = Appointment.objects.first()
+        self.assertEqual(appointment.customer_name, data['customer_name'])
 
-    def test_create_job_missing_required_fields(self):
-        url = reverse('create_job')
+    def test_create_appointment_missing_required_fields(self):
+        url = reverse('create_appointment')
 
         # Missing all required fields (empty payload)
         data = {}
@@ -105,10 +105,10 @@ class JobAPITests(APITestCase):
         self.assertIn('address', response.data)
         self.assertIn('scheduled_time', response.data)
 
-class JobDeleteAPITests(APITestCase):
+class AppointmentDeleteAPITests(APITestCase):
 
     def setUp(self):
-        self.job = Job.objects.create(
+        self.appointment = Appointment.objects.create(
             customer_name="Charlie",
             customer_phone="777-888-9999",
             address="300 Pine St",
@@ -116,22 +116,22 @@ class JobDeleteAPITests(APITestCase):
             scheduled_time="2025-06-03T11:00:00Z"
         )
 
-    def test_delete_job_success(self):
-        url = reverse('delete_job', kwargs={'pk': self.job.pk})
+    def test_delete_appointment_success(self):
+        url = reverse('delete_appointment', kwargs={'pk': self.appointment.pk})
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(Job.objects.filter(pk=self.job.pk).exists())
+        self.assertFalse(Appointment.objects.filter(pk=self.appointment.pk).exists())
 
-    def test_delete_job_not_found(self):
-        url = reverse('delete_job', kwargs={'pk': 9999})  # non-existent pk
+    def test_delete_appointment_not_found(self):
+        url = reverse('delete_appointment', kwargs={'pk': 9999})  # non-existent pk
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn('error', response.data)
 
-class JobUpdateAPITests(APITestCase):
+class AppointmentUpdateAPITests(APITestCase):
 
     def setUp(self):
-        self.job = Job.objects.create(
+        self.appointment = Appointment.objects.create(
             customer_name="Dana",
             customer_phone="111-222-3333",
             address="400 Oak St",
@@ -139,16 +139,16 @@ class JobUpdateAPITests(APITestCase):
             scheduled_time="2025-06-04T09:00:00Z"
         )
 
-    def test_update_job_partial(self):
-        url = reverse('update_job', kwargs={'pk': self.job.pk})
+    def test_update_appointment_partial(self):
+        url = reverse('update_appointment', kwargs={'pk': self.appointment.pk})
         data = {'description': 'Replace faucet with new model'}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.job.refresh_from_db()
-        self.assertEqual(self.job.description, data['description'])
+        self.appointment.refresh_from_db()
+        self.assertEqual(self.appointment.description, data['description'])
 
-    def test_update_job_full(self):
-        url = reverse('update_job', kwargs={'pk': self.job.pk})
+    def test_update_appointment_full(self):
+        url = reverse('update_appointment', kwargs={'pk': self.appointment.pk})
         data = {
             'customer_name': "Dana Updated",
             'customer_phone': "444-555-6666",
@@ -158,12 +158,12 @@ class JobUpdateAPITests(APITestCase):
         }
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.job.refresh_from_db()
-        self.assertEqual(self.job.customer_name, data['customer_name'])
-        self.assertEqual(self.job.description, data['description'])
+        self.appointment.refresh_from_db()
+        self.assertEqual(self.appointment.customer_name, data['customer_name'])
+        self.assertEqual(self.appointment.description, data['description'])
 
-    def test_update_job_not_found(self):
-        url = reverse('update_job', kwargs={'pk': 9999})  # non-existent job
+    def test_update_appointment_not_found(self):
+        url = reverse('update_appointment', kwargs={'pk': 9999})  # non-existent appointment
         data = {'description': 'Will not work'}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
