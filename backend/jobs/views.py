@@ -27,3 +27,16 @@ def delete_job(request, pk):
 
     job.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['PUT', 'PATCH'])
+def update_job(request, pk):
+    try:
+        job = Job.objects.get(pk=pk)
+    except Job.DoesNotExist:
+        return Response({'error': 'Job not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = JobSerializer(job, data=request.data, partial=True)  # partial=True allows PATCH
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

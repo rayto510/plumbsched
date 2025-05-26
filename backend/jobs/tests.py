@@ -80,3 +80,67 @@ class JobAPITests(APITestCase):
         self.assertIn('customer_phone', response.data)
         self.assertIn('address', response.data)
         self.assertIn('scheduled_time', response.data)
+
+class JobDeleteAPITests(APITestCase):
+
+    def setUp(self):
+        self.job = Job.objects.create(
+            customer_name="Charlie",
+            customer_phone="777-888-9999",
+            address="300 Pine St",
+            description="Repair leak",
+            scheduled_time="2025-06-03T11:00:00Z"
+        )
+
+    def test_delete_job_success(self):
+        url = reverse('delete_job', kwargs={'pk': self.job.pk})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Job.objects.filter(pk=self.job.pk).exists())
+
+    def test_delete_job_not_found(self):
+        url = reverse('delete_job', kwargs={'pk': 9999})  # non-existent pk
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn('error', response.data)
+
+class JobUpdateAPITests(APITestCase):
+
+    def setUp(self):
+        self.job = Job.objects.create(
+            customer_name="Dana",
+            customer_phone="111-222-3333",
+            address="400 Oak St",
+            description="Install new faucet",
+            scheduled_time="2025-06-04T09:00:00Z"
+        )
+
+    def test_update_job_partial(self):
+        url = reverse('update_job', kwargs={'pk': self.job.pk})
+        data = {'description': 'Replace faucet with new model'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.job.refresh_from_db()
+        self.assertEqual(self.job.description, data['description'])
+
+    def test_update_job_full(self):
+        url = reverse('update_job', kwargs={'pk': self.job.pk})
+        data = {
+            'customer_name': "Dana Updated",
+            'customer_phone': "444-555-6666",
+            'address': "500 Birch St",
+            'description': "Full bathroom remodel",
+            'scheduled_time': "2025-06-05T10:00:00Z"
+        }
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.job.refresh_from_db()
+        self.assertEqual(self.job.customer_name, data['customer_name'])
+        self.assertEqual(self.job.description, data['description'])
+
+    def test_update_job_not_found(self):
+        url = reverse('update_job', kwargs={'pk': 9999})  # non-existent job
+        data = {'description': 'Will not work'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn('error', response.data)
