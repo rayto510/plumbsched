@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'appointments',
     'users',
+    'services',
 ]
 
 MIDDLEWARE = [
