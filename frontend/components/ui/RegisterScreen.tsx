@@ -8,14 +8,10 @@ import {
   View,
 } from "react-native";
 import { register } from "@/utils/api/auth";
+import { useRouter } from "expo-router";
 
-type RegisterScreenProps = {
-  onRegisterSuccess: () => void;
-};
-
-export default function RegisterScreen({
-  onRegisterSuccess,
-}: RegisterScreenProps) {
+export default function RegisterScreen() {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,7 +25,7 @@ export default function RegisterScreen({
     try {
       await register(username, password);
       Alert.alert("Registration successful!");
-      onRegisterSuccess();
+      router.replace("/login");
     } catch (error: any) {
       Alert.alert("Registration failed", error.message || "Unknown error");
     } finally {

@@ -10,11 +10,7 @@ import {
 } from "react-native";
 import { login } from "@/utils/api/auth";
 
-type LoginScreenProps = {
-  onLoginSuccess: () => void;
-};
-
-export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
+export default function LoginScreen() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -29,7 +25,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     try {
       const tokens = await login(username, password);
       // TODO: Save tokens in AsyncStorage or Context
-      onLoginSuccess();
+      router.replace("/"); // Navigate to home screen
     } catch (error: any) {
       Alert.alert("Login failed", error.message || "Unknown error");
     } finally {

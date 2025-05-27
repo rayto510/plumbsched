@@ -7,16 +7,12 @@ import RegisterScreen from "@/components/ui/RegisterScreen";
 jest.mock("@/utils/api/auth");
 
 describe("RegisterScreen", () => {
-  const onRegisterSuccess = jest.fn();
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("renders input fields and button", () => {
-    const { getByPlaceholderText, getByText } = render(
-      <RegisterScreen onRegisterSuccess={onRegisterSuccess} />
-    );
+    const { getByPlaceholderText, getByText } = render(<RegisterScreen />);
 
     expect(getByPlaceholderText("Username")).toBeTruthy();
     expect(getByPlaceholderText("Password")).toBeTruthy();
@@ -26,9 +22,7 @@ describe("RegisterScreen", () => {
   it("shows alert if username or password is empty", () => {
     const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {});
 
-    const { getByText } = render(
-      <RegisterScreen onRegisterSuccess={onRegisterSuccess} />
-    );
+    const { getByText } = render(<RegisterScreen />);
     fireEvent.press(getByText("Register"));
 
     expect(alertSpy).toHaveBeenCalledWith("Please enter username and password");
@@ -39,9 +33,7 @@ describe("RegisterScreen", () => {
   it("calls register API and onRegisterSuccess on success", async () => {
     (register as jest.Mock).mockResolvedValueOnce({});
 
-    const { getByPlaceholderText, getByText } = render(
-      <RegisterScreen onRegisterSuccess={onRegisterSuccess} />
-    );
+    const { getByPlaceholderText, getByText } = render(<RegisterScreen />);
 
     fireEvent.changeText(getByPlaceholderText("Username"), "newuser");
     fireEvent.changeText(getByPlaceholderText("Password"), "newpass");
@@ -49,7 +41,6 @@ describe("RegisterScreen", () => {
 
     await waitFor(() => {
       expect(register).toHaveBeenCalledWith("newuser", "newpass");
-      expect(onRegisterSuccess).toHaveBeenCalled();
     });
   });
 
@@ -58,9 +49,7 @@ describe("RegisterScreen", () => {
 
     const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {});
 
-    const { getByPlaceholderText, getByText } = render(
-      <RegisterScreen onRegisterSuccess={onRegisterSuccess} />
-    );
+    const { getByPlaceholderText, getByText } = render(<RegisterScreen />);
 
     fireEvent.changeText(getByPlaceholderText("Username"), "newuser");
     fireEvent.changeText(getByPlaceholderText("Password"), "newpass");
