@@ -3,12 +3,35 @@ import React from "react";
 import { Alert } from "react-native";
 import { login } from "@/utils/api/auth";
 import LoginScreen from "@/components/ui/LoginScreen";
+import { useRouter } from "expo-router";
+
+jest.mock("expo-router", () => ({
+  useRouter: jest.fn(),
+}));
 
 jest.mock("@/utils/api/auth");
 
 describe("LoginScreen", () => {
   beforeEach(() => {
+    (useRouter as jest.Mock).mockReturnValue({
+      push: mockRouterPush,
+    });
     jest.clearAllMocks();
+  });
+
+  const mockRouterPush = jest.fn();
+
+  it('navigates to register screen when "Don\'t have an account? Register" is pressed', () => {
+    const { getByText } = render(<LoginScreen />);
+
+    // Find the clickable register text
+    const registerText = getByText("Don't have an account? Register");
+
+    // Simulate press
+    fireEvent.press(registerText);
+
+    // Assert router.push called with "/register"
+    expect(mockRouterPush).toHaveBeenCalledWith("/register");
   });
 
   it("renders input fields and buttons", () => {
