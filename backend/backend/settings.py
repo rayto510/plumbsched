@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'appointments',
     'users',
     'services',
+    'work_hours',
 ]
 
 MIDDLEWARE = [
