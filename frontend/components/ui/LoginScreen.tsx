@@ -40,6 +40,10 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome Back!</Text>
+      <Text style={styles.subtitle}>
+        Ready to manage your plumbing schedule easily? Log in to get started.
+      </Text>
+
       <TextInput
         style={styles.input}
         placeholder="Username"
@@ -93,6 +97,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#2c3e50", // dark slate blue, professional & grounded
     fontFamily: "System", // use system font for familiarity
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#556677", // a soft, approachable gray-blue
+    textAlign: "center",
+    marginBottom: 25,
+    fontFamily: "System",
+    lineHeight: 22,
   },
   input: {
     height: 50,
