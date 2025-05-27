@@ -77,39 +77,48 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    paddingHorizontal: 30,
-    backgroundColor: "#f5f5f5",
+    paddingHorizontal: 25,
+    backgroundColor: "#e9f1f7", // same soft blue background
   },
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 30,
+    fontSize: 26,
+    fontWeight: "700",
+    marginBottom: 25,
     textAlign: "center",
-    color: "#333",
+    color: "#2c3e50", // dark slate blue, grounded & friendly
+    fontFamily: "System",
   },
   input: {
     height: 50,
-    borderColor: "#ccc",
+    borderColor: "#7f8c8d", // subtle gray-blue border
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 6,
     marginBottom: 15,
     paddingHorizontal: 15,
     backgroundColor: "white",
     fontSize: 16,
+    fontFamily: "System",
+    color: "#34495e", // text color consistent with login
   },
   button: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#2980b9", // stable deep blue button
     paddingVertical: 15,
-    borderRadius: 8,
+    borderRadius: 6,
     alignItems: "center",
     marginTop: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
   },
   buttonDisabled: {
-    backgroundColor: "#a0cfff",
+    backgroundColor: "#85c1e9", // lighter blue disabled state
   },
   buttonText: {
     color: "white",
     fontSize: 18,
     fontWeight: "600",
+    fontFamily: "System",
   },
 });
