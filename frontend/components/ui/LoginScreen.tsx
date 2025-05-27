@@ -25,7 +25,7 @@ export default function LoginScreen() {
     try {
       const tokens = await login(username, password);
       // TODO: Save tokens in AsyncStorage or Context
-      router.replace("/"); // Navigate to home screen
+      router.replace("/(tabs)"); // Navigate to home screen
     } catch (error: any) {
       Alert.alert("Login failed", error.message || "Unknown error");
     } finally {
