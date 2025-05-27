@@ -1,6 +1,21 @@
-// app/_layout.tsx
+// frontend/app/_layout.tsx or wherever your root layout is
 import { Stack } from "expo-router";
+import { useState } from "react";
 
 export default function RootLayout() {
-  return <Stack screenOptions={{ headerShown: false }} />;
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  return (
+    <Stack>
+      {isLoggedIn ? (
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      ) : (
+        <Stack.Screen
+          name="login"
+          options={{ headerShown: false }}
+          initialParams={{ onLoginSuccess: () => setIsLoggedIn(true) }}
+        />
+      )}
+    </Stack>
+  );
 }

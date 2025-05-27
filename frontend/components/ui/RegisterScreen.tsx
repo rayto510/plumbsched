@@ -1,4 +1,3 @@
-import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -8,30 +7,31 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { login } from "@/utils/api/auth";
+import { register } from "@/utils/api/auth";
 
-type LoginScreenProps = {
-  onLoginSuccess: () => void;
+type RegisterScreenProps = {
+  onRegisterSuccess: () => void;
 };
 
-export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
-  const router = useRouter();
+export default function RegisterScreen({
+  onRegisterSuccess,
+}: RegisterScreenProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     if (!username || !password) {
       Alert.alert("Please enter username and password");
       return;
     }
     setLoading(true);
     try {
-      const tokens = await login(username, password);
-      // TODO: Save tokens in AsyncStorage or Context
-      onLoginSuccess();
+      await register(username, password);
+      Alert.alert("Registration successful!");
+      onRegisterSuccess();
     } catch (error: any) {
-      Alert.alert("Login failed", error.message || "Unknown error");
+      Alert.alert("Registration failed", error.message || "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -39,7 +39,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome Back!</Text>
+      <Text style={styles.title}>Create an Account</Text>
       <TextInput
         style={styles.input}
         placeholder="Username"
@@ -56,24 +56,18 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        autoCapitalize="none"
         returnKeyType="done"
-        onSubmitEditing={handleLogin}
+        onSubmitEditing={handleRegister}
       />
       <TouchableOpacity
         style={[styles.button, loading && styles.buttonDisabled]}
-        onPress={handleLogin}
+        onPress={handleRegister}
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Logging in..." : "Log In"}
+          {loading ? "Registering..." : "Register"}
         </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => router.push("/register")}
-        style={styles.registerLink}
-      >
-        <Text style={styles.registerText}>Don't have an account? Register</Text>
       </TouchableOpacity>
     </View>
   );
@@ -117,13 +111,5 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "600",
-  },
-  registerLink: {
-    marginTop: 20,
-    alignItems: "center",
-  },
-  registerText: {
-    color: "#007AFF",
-    fontSize: 16,
   },
 });

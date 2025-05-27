@@ -1,43 +1,75 @@
+import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
 import { Alert } from "react-native";
-import LoginScreen from "../LoginScreen"; // Adjust the path based on your folder structure
+import { login } from "@/utils/api/auth";
+import LoginScreen from "@/components/ui/LoginScreen";
+
+jest.mock("@/utils/api/auth");
 
 describe("LoginScreen", () => {
-  const mockOnLogin = jest.fn();
+  const onLoginSuccess = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("renders the login screen UI", () => {
+  it("renders input fields and buttons", () => {
     const { getByPlaceholderText, getByText } = render(
-      <LoginScreen onLogin={mockOnLogin} />
+      <LoginScreen onLoginSuccess={onLoginSuccess} />
     );
 
-    expect(getByPlaceholderText("Email")).toBeTruthy();
+    expect(getByPlaceholderText("Username")).toBeTruthy();
     expect(getByPlaceholderText("Password")).toBeTruthy();
     expect(getByText("Log In")).toBeTruthy();
   });
 
-  it("calls onLogin with email and password", () => {
-    const { getByPlaceholderText, getByText } = render(
-      <LoginScreen onLogin={mockOnLogin} />
-    );
-
-    fireEvent.changeText(getByPlaceholderText("Email"), "test@example.com");
-    fireEvent.changeText(getByPlaceholderText("Password"), "password123");
-    fireEvent.press(getByText("Log In"));
-
-    expect(mockOnLogin).toHaveBeenCalledWith("test@example.com", "password123");
-  });
-
-  it("shows alert if email or password is empty", () => {
+  it("shows alert if username or password is empty", () => {
     const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {});
 
-    const { getByText } = render(<LoginScreen onLogin={mockOnLogin} />);
+    const { getByText } = render(
+      <LoginScreen onLoginSuccess={onLoginSuccess} />
+    );
     fireEvent.press(getByText("Log In"));
 
-    expect(alertSpy).toHaveBeenCalledWith("Please enter email and password");
+    expect(alertSpy).toHaveBeenCalledWith("Please enter username and password");
+
+    alertSpy.mockRestore();
+  });
+
+  it("calls login API and onLoginSuccess on successful login", async () => {
+    (login as jest.Mock).mockResolvedValueOnce({ access: "token" });
+
+    const { getByPlaceholderText, getByText } = render(
+      <LoginScreen onLoginSuccess={onLoginSuccess} />
+    );
+
+    fireEvent.changeText(getByPlaceholderText("Username"), "testuser");
+    fireEvent.changeText(getByPlaceholderText("Password"), "testpass");
+    fireEvent.press(getByText("Log In"));
+
+    await waitFor(() => {
+      expect(login).toHaveBeenCalledWith("testuser", "testpass");
+      expect(onLoginSuccess).toHaveBeenCalled();
+    });
+  });
+
+  it("shows alert on login failure", async () => {
+    (login as jest.Mock).mockRejectedValueOnce(new Error("Failed"));
+
+    const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {});
+
+    const { getByPlaceholderText, getByText } = render(
+      <LoginScreen onLoginSuccess={onLoginSuccess} />
+    );
+
+    fireEvent.changeText(getByPlaceholderText("Username"), "testuser");
+    fireEvent.changeText(getByPlaceholderText("Password"), "wrongpass");
+    fireEvent.press(getByText("Log In"));
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith("Login failed", "Failed");
+    });
+
+    alertSpy.mockRestore();
   });
 });
