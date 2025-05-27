@@ -1,45 +1,43 @@
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
-import LoginScreen from "../LoginScreen";
+import { render, fireEvent } from "@testing-library/react-native";
 import { Alert } from "react-native";
+import LoginScreen from "../LoginScreen"; // Adjust the path based on your folder structure
 
 describe("LoginScreen", () => {
   const mockOnLogin = jest.fn();
 
   beforeEach(() => {
-    mockOnLogin.mockClear();
+    jest.clearAllMocks();
   });
 
-  it("renders correctly", () => {
+  it("renders the login screen UI", () => {
     const { getByPlaceholderText, getByText } = render(
       <LoginScreen onLogin={mockOnLogin} />
     );
+
     expect(getByPlaceholderText("Email")).toBeTruthy();
     expect(getByPlaceholderText("Password")).toBeTruthy();
     expect(getByText("Log In")).toBeTruthy();
   });
 
-  it("shows alert if email or password is empty", () => {
-    const alertMock = jest.spyOn(Alert, "alert").mockImplementation(() => {});
-
-    const { getByText } = render(<LoginScreen onLogin={mockOnLogin} />);
-    fireEvent.press(getByText("Log In"));
-
-    expect(mockOnLogin).not.toHaveBeenCalled();
-
-    alertMock.mockRestore();
-  });
-
-  it("calls onLogin with email and password when both are provided", () => {
+  it("calls onLogin with email and password", () => {
     const { getByPlaceholderText, getByText } = render(
       <LoginScreen onLogin={mockOnLogin} />
     );
 
     fireEvent.changeText(getByPlaceholderText("Email"), "test@example.com");
     fireEvent.changeText(getByPlaceholderText("Password"), "password123");
-
     fireEvent.press(getByText("Log In"));
 
     expect(mockOnLogin).toHaveBeenCalledWith("test@example.com", "password123");
+  });
+
+  it("shows alert if email or password is empty", () => {
+    const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {});
+
+    const { getByText } = render(<LoginScreen onLogin={mockOnLogin} />);
+    fireEvent.press(getByText("Log In"));
+
+    expect(alertSpy).toHaveBeenCalledWith("Please enter email and password");
   });
 });

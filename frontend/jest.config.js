@@ -1,7 +1,15 @@
+// jest.config.js or jest.config.ts
+const nextJest = require("jest-expo/jest-preset");
+
 module.exports = {
   preset: "jest-expo",
-  setupFilesAfterEnv: ["@testing-library/jest-native/extend-expect"],
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+  transform: {
+    "^.+\\.[jt]sx?$": "babel-jest",
+  },
   transformIgnorePatterns: [
-    "node_modules/(?!(jest-)?react-native|@react-native|@react-navigation|expo(nent)?|expo-modules-core|expo.*)",
+    "node_modules/(?!(jest-expo|expo(nent)?|react-native|@react-native|@expo|expo-modules-core|@unimodules|native-base|@react-navigation)/)",
   ],
+  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+  testEnvironment: "jsdom",
 };
