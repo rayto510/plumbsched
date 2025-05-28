@@ -19,20 +19,9 @@ jest.mock("expo-router", () => ({
 // Mock Alert
 jest.spyOn(Alert, "alert");
 
-// Mock fetch globally to return one appointment
-global.fetch = jest.fn(() =>
-  Promise.resolve({
-    json: () =>
-      Promise.resolve([
-        {
-          id: 1,
-          customer_name: "John Doe",
-          address: "123 Main St",
-          scheduled_time: "2025-06-01T10:00:00Z",
-        },
-      ]),
-  })
-) as jest.Mock;
+// Mock fetch globally
+const mockFetch = jest.fn();
+global.fetch = mockFetch as jest.Mock;
 
 // Helper to wrap component with NavigationContainer
 const renderWithNavigation = () => {
@@ -46,6 +35,27 @@ const renderWithNavigation = () => {
 describe("AppointmentsScreen", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Default fetch mock returns one appointment on GET
+    mockFetch.mockImplementation((url, options) => {
+      if (options?.method === "DELETE") {
+        // Simulate successful DELETE response
+        return Promise.resolve({ ok: true });
+      }
+      // Default GET response
+      return Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve([
+            {
+              id: 1,
+              customer_name: "John Doe",
+              address: "123 Main St",
+              scheduled_time: "2025-06-01T10:00:00Z",
+            },
+          ]),
+      });
+    });
   });
 
   it("renders appointments after fetch", async () => {

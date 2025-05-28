@@ -32,6 +32,7 @@ export default function AppointmentsScreen() {
 
   const fetchAppointments = async () => {
     try {
+      setLoading(true);
       const res = await fetch("http://localhost:8000/appointments/");
       const data = await res.json();
       setAppointments(data);
@@ -42,10 +43,30 @@ export default function AppointmentsScreen() {
     }
   };
 
-  // Simple logout handler
+  const deleteAppointment = async (id: number) => {
+    try {
+      const res = await fetch(`http://localhost:8000/appointments/${id}/`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete");
+      fetchAppointments();
+    } catch (err) {
+      Alert.alert("Error", "Failed to delete appointment.");
+    }
+  };
+
+  const confirmDelete = (id: number) => {
+    Alert.alert("Delete", "Are you sure you want to delete this appointment?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => deleteAppointment(id),
+      },
+    ]);
+  };
+
   const handleLogout = () => {
-    // TODO: Clear auth tokens/state here if you have any
-    // For now, just navigate to login
     Alert.alert("Logout", "You have been logged out.", [
       { text: "OK", onPress: () => router.replace("/") },
     ]);
@@ -66,14 +87,31 @@ export default function AppointmentsScreen() {
         data={appointments}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => router.push(`/appointments/${item.id}`)}
-            style={{ padding: 12, borderBottomWidth: 1, borderColor: "#ccc" }}
+          <View
+            style={{
+              padding: 12,
+              borderBottomWidth: 1,
+              borderColor: "#ccc",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
           >
-            <Text style={{ fontWeight: "bold" }}>{item.customer_name}</Text>
-            <Text>{item.address}</Text>
-            <Text>{new Date(item.scheduled_time).toLocaleString()}</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={{ flex: 1 }}
+              onPress={() => router.push(`/appointments/${item.id}`)}
+            >
+              <Text style={{ fontWeight: "bold" }}>{item.customer_name}</Text>
+              <Text>{item.address}</Text>
+              <Text>{new Date(item.scheduled_time).toLocaleString()}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => confirmDelete(item.id)}
+              style={styles.deleteButton}
+            >
+              <Text style={styles.deleteButtonText}>Delete</Text>
+            </TouchableOpacity>
+          </View>
         )}
       />
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -94,72 +132,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     paddingHorizontal: 25,
-    backgroundColor: "#e9f1f7", // soft light blue for calm, clean feeling
+    backgroundColor: "#e9f1f7",
   },
   title: {
     fontSize: 26,
     fontWeight: "700",
     marginBottom: 25,
     textAlign: "center",
-    color: "#2c3e50", // dark slate blue, professional & grounded
-    fontFamily: "System", // use system font for familiarity
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#556677", // a soft, approachable gray-blue
-    textAlign: "center",
-    marginBottom: 25,
-    fontFamily: "System",
-    lineHeight: 22,
-  },
-  input: {
-    height: 50,
-    borderColor: "#7f8c8d", // medium gray with slight blue tint for subtlety
-    borderWidth: 1,
-    borderRadius: 6,
-    marginBottom: 15,
-    paddingHorizontal: 15,
-    backgroundColor: "white",
-    fontSize: 16,
-    fontFamily: "System",
-    color: "#34495e", // dark gray-blue text
-  },
-  button: {
-    backgroundColor: "#2980b9", // calm, deep blue - trustworthy & solid
-    paddingVertical: 15,
-    borderRadius: 6,
-    alignItems: "center",
-    marginTop: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  buttonDisabled: {
-    backgroundColor: "#85c1e9", // lighter blue when disabled
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "600",
-    fontFamily: "System",
-  },
-  registerLink: {
-    marginTop: 25,
-    alignItems: "center",
-  },
-  registerText: {
-    color: "#2980b9",
-    fontSize: 16,
-    fontWeight: "500",
+    color: "#2c3e50",
     fontFamily: "System",
   },
   logoutButton: {
     position: "absolute",
     bottom: 20,
     left: 20,
-    backgroundColor: "#c0392b", // red for logout
+    backgroundColor: "#c0392b",
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -187,5 +174,16 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  deleteButton: {
+    backgroundColor: "#e74c3c",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginLeft: 12,
+  },
+  deleteButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
