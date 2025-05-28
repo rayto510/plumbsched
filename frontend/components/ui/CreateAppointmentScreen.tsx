@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/utils/config";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
@@ -123,16 +124,13 @@ export default function CreateAppointmentScreen() {
     };
 
     try {
-      const response = await fetch(
-        "http://localhost:8000/appointments/create/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/appointments/create/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
       if (response.ok) {
         Alert.alert("Success", "Appointment created");

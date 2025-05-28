@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/utils/config";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -34,7 +35,7 @@ export default function AppointmentDetail() {
     async function fetchAppointment() {
       try {
         const response = await fetch(
-          `http://localhost:8000/appointments/${id}/details/`
+          `${API_BASE_URL}/appointments/${id}/details/`
         );
         if (response.ok) {
           const data = await response.json();

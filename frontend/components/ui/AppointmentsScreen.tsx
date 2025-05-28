@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/utils/config";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
@@ -33,7 +34,7 @@ export default function AppointmentsScreen() {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:8000/appointments/");
+      const res = await fetch(`${API_BASE_URL}/appointments/`);
       const data = await res.json();
       setAppointments(data);
     } catch (err) {
@@ -45,7 +46,7 @@ export default function AppointmentsScreen() {
 
   const deleteAppointment = async (id: number) => {
     try {
-      const res = await fetch(`http://localhost:8000/appointments/${id}/`, {
+      const res = await fetch(`${API_BASE_URL}/appointments/${id}/`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete");
