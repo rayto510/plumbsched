@@ -1,3 +1,5 @@
+import { register } from "@/utils/api/auth";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -7,8 +9,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { register } from "@/utils/api/auth";
-import { useRouter } from "expo-router";
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function RegisterScreen() {
     try {
       await register(username, password);
       Alert.alert("Registration successful!");
-      router.replace("/login");
+      router.replace("/");
     } catch (error: any) {
       Alert.alert("Registration failed", error.message || "Unknown error");
     } finally {
@@ -65,11 +65,31 @@ export default function RegisterScreen() {
           {loading ? "Registering..." : "Register"}
         </Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => router.push("/")}
+        style={styles.loginLink}
+      >
+        <Text style={styles.loginLinkHighlight}>
+          Already have an account? Log in
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  loginLink: {
+    marginTop: 25,
+    alignItems: "center",
+  },
+  loginLinkText: {
+    color: "#556677",
+    fontSize: 16,
+  },
+  loginLinkHighlight: {
+    color: "#2980b9",
+    fontWeight: "600",
+  },
   container: {
     flex: 1,
     justifyContent: "center",
