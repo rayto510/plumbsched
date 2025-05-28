@@ -25,7 +25,10 @@ SECRET_KEY = 'django-insecure-a4*ggr7o=ku(3tbz1xeq%ks0xua*llv@5^ji^@^n)s6qq0hggo
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'plumbsched-backend.onrender.com',  # Your Render backend domain
+    'localhost',
+]
 
 
 # Application definition
@@ -134,6 +137,7 @@ REST_FRAMEWORK = {
     ),
 }
 
+CORS_ALLOW_ALL_ORIGINS = False  # safer for production
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8081",  # Your frontend URL
     # Add more origins if needed
