@@ -2,9 +2,9 @@ FROM node:24-slim
 
 WORKDIR /app
 
-COPY frontend/package*.json ./
+COPY package*.json ./
 RUN npm install
 
-COPY frontend .
+COPY . .
 
 CMD ["npx", "expo", "start", "--tunnel"]
