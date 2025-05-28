@@ -11,6 +11,11 @@ services:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
+      - POSTGRES_DB=yourdb
+      - POSTGRES_USER=youruser
+      - POSTGRES_PASSWORD=yourpassword
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
     command: python manage.py runserver 0.0.0.0:8000
     depends_on:
       - db

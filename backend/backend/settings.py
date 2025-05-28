@@ -1,3 +1,4 @@
+import os
 """
 Django settings for backend project.
 
@@ -84,8 +85,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'yourdb'),
+        'USER': os.getenv('POSTGRES_USER', 'youruser'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'yourpassword'),
+        'HOST': os.getenv('POSTGRES_HOST', 'db'),  # 'db' matches your docker-compose service name
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
 }
 
