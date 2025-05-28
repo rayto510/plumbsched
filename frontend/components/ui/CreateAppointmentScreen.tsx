@@ -1,6 +1,7 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   Alert,
   Button,
@@ -24,6 +25,34 @@ export default function CreateAppointmentScreen() {
 
   const [showPicker, setShowPicker] = useState(false);
   const [pickerMode, setPickerMode] = useState<"date" | "time">("date");
+
+  // Validation error state
+  const [errors, setErrors] = useState<{
+    customerName?: string;
+    customerPhone?: string;
+    address?: string;
+    description?: string;
+    scheduledDate?: string;
+  }>({});
+
+  const resetForm = () => {
+    setCustomerName("");
+    setCustomerPhone("");
+    setAddress("");
+    setDescription("");
+    setScheduledDate(new Date());
+    setErrors({});
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      resetForm();
+      return () => {
+        // Reset form when screen is unfocused
+        resetForm();
+      };
+    }, [])
+  );
 
   const openPicker = (mode: "date" | "time") => {
     setPickerMode(mode);
@@ -49,7 +78,42 @@ export default function CreateAppointmentScreen() {
     setShowPicker(false);
   };
 
+  // Validate inputs, return true if valid, false if errors
+  const validate = () => {
+    const newErrors: typeof errors = {};
+
+    if (!customerName.trim()) {
+      newErrors.customerName = "Customer name is required";
+    }
+
+    if (!customerPhone.trim()) {
+      newErrors.customerPhone = "Phone number is required";
+    } else if (
+      !/^\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/.test(customerPhone.trim())
+    ) {
+      newErrors.customerPhone = "Invalid phone number format";
+    }
+
+    if (!address.trim()) {
+      newErrors.address = "Address is required";
+    }
+
+    if (!description.trim()) {
+      newErrors.description = "Description is required";
+    }
+
+    if (!scheduledDate || scheduledDate <= new Date()) {
+      newErrors.scheduledDate = "Scheduled date & time must be in the future";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async () => {
+    if (!validate()) return;
+
     const payload = {
       customer_name: customerName,
       customer_phone: customerPhone,
@@ -90,6 +154,7 @@ export default function CreateAppointmentScreen() {
       >
         <Text style={styles.backButtonText}>← Back to Appointments</Text>
       </TouchableOpacity>
+
       <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
         New Appointment
       </Text>
@@ -97,82 +162,78 @@ export default function CreateAppointmentScreen() {
       <Text style={{ marginBottom: 4 }}>Customer Name</Text>
       <TextInput
         value={customerName}
-        onChangeText={setCustomerName}
-        placeholder="Jane Doe"
-        style={{
-          borderWidth: 1,
-          borderRadius: 6,
-          padding: 10,
-          marginBottom: 16,
+        onChangeText={(text) => {
+          setCustomerName(text);
+          if (errors.customerName)
+            setErrors((e) => ({ ...e, customerName: undefined }));
         }}
+        placeholder="Jane Doe"
+        style={[styles.input, errors.customerName && styles.inputError]}
       />
+      {errors.customerName && (
+        <Text style={styles.errorText}>{errors.customerName}</Text>
+      )}
 
       <Text style={{ marginBottom: 4 }}>Customer Phone</Text>
       <TextInput
         value={customerPhone}
-        onChangeText={setCustomerPhone}
+        onChangeText={(text) => {
+          setCustomerPhone(text);
+          if (errors.customerPhone)
+            setErrors((e) => ({ ...e, customerPhone: undefined }));
+        }}
         placeholder="111-222-3333"
         keyboardType="phone-pad"
-        style={{
-          borderWidth: 1,
-          borderRadius: 6,
-          padding: 10,
-          marginBottom: 16,
-        }}
+        style={[styles.input, errors.customerPhone && styles.inputError]}
       />
+      {errors.customerPhone && (
+        <Text style={styles.errorText}>{errors.customerPhone}</Text>
+      )}
 
       <Text style={{ marginBottom: 4 }}>Address</Text>
       <TextInput
         value={address}
-        onChangeText={setAddress}
-        placeholder="100 Main St"
-        style={{
-          borderWidth: 1,
-          borderRadius: 6,
-          padding: 10,
-          marginBottom: 16,
+        onChangeText={(text) => {
+          setAddress(text);
+          if (errors.address) setErrors((e) => ({ ...e, address: undefined }));
         }}
+        placeholder="100 Main St"
+        style={[styles.input, errors.address && styles.inputError]}
       />
+      {errors.address && <Text style={styles.errorText}>{errors.address}</Text>}
 
       <Text style={{ marginBottom: 4 }}>Description</Text>
       <TextInput
         value={description}
-        onChangeText={setDescription}
+        onChangeText={(text) => {
+          setDescription(text);
+          if (errors.description)
+            setErrors((e) => ({ ...e, description: undefined }));
+        }}
         placeholder="Fix sink"
         multiline
-        style={{
-          borderWidth: 1,
-          borderRadius: 6,
-          padding: 10,
-          marginBottom: 16,
-          minHeight: 60,
-        }}
+        style={[
+          styles.input,
+          styles.textarea,
+          errors.description && styles.inputError,
+        ]}
       />
+      {errors.description && (
+        <Text style={styles.errorText}>{errors.description}</Text>
+      )}
 
       <Text style={{ marginBottom: 4 }}>Scheduled Date & Time</Text>
 
       <Pressable
         onPress={() => openPicker("date")}
-        style={{
-          borderWidth: 1,
-          borderRadius: 6,
-          padding: 12,
-          marginBottom: 8,
-          backgroundColor: "#f9f9f9",
-        }}
+        style={[styles.datePicker, errors.scheduledDate && styles.inputError]}
       >
         <Text>{scheduledDate.toLocaleDateString()}</Text>
       </Pressable>
 
       <Pressable
         onPress={() => openPicker("time")}
-        style={{
-          borderWidth: 1,
-          borderRadius: 6,
-          padding: 12,
-          marginBottom: 20,
-          backgroundColor: "#f9f9f9",
-        }}
+        style={[styles.datePicker, errors.scheduledDate && styles.inputError]}
       >
         <Text>
           {scheduledDate.toLocaleTimeString([], {
@@ -182,12 +243,19 @@ export default function CreateAppointmentScreen() {
         </Text>
       </Pressable>
 
+      {errors.scheduledDate && (
+        <Text style={[styles.errorText, { marginBottom: 16 }]}>
+          {errors.scheduledDate}
+        </Text>
+      )}
+
       {showPicker && (
         <DateTimePicker
           value={scheduledDate}
           mode={pickerMode}
           display={Platform.OS === "ios" ? "spinner" : "default"}
           onChange={handleDateChange}
+          minimumDate={new Date()} // prevent selecting past date/time on iOS/Android
         />
       )}
 
@@ -215,27 +283,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     paddingHorizontal: 25,
-    backgroundColor: "#e9f1f7", // soft light blue for calm, clean feeling
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "700",
-    marginBottom: 25,
-    textAlign: "center",
-    color: "#2c3e50", // dark slate blue, professional & grounded
-    fontFamily: "System", // use system font for familiarity
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#556677", // a soft, approachable gray-blue
-    textAlign: "center",
-    marginBottom: 25,
-    fontFamily: "System",
-    lineHeight: 22,
+    backgroundColor: "#e9f1f7",
   },
   input: {
     height: 50,
-    borderColor: "#7f8c8d", // medium gray with slight blue tint for subtlety
+    borderColor: "#7f8c8d",
     borderWidth: 1,
     borderRadius: 6,
     marginBottom: 15,
@@ -243,37 +295,26 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     fontSize: 16,
     fontFamily: "System",
-    color: "#34495e", // dark gray-blue text
+    color: "#34495e",
   },
-  button: {
-    backgroundColor: "#2980b9", // calm, deep blue - trustworthy & solid
-    paddingVertical: 15,
-    borderRadius: 6,
-    alignItems: "center",
-    marginTop: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
+  textarea: {
+    minHeight: 60,
+    paddingTop: 12,
+    textAlignVertical: "top",
   },
-  buttonDisabled: {
-    backgroundColor: "#85c1e9", // lighter blue when disabled
+  inputError: {
+    borderColor: "#e74c3c",
   },
-  buttonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "600",
-    fontFamily: "System",
-  },
-  registerLink: {
-    marginTop: 25,
-    alignItems: "center",
-  },
-  registerText: {
-    color: "#2980b9",
-    fontSize: 16,
+  errorText: {
+    color: "#e74c3c",
+    marginBottom: 12,
     fontWeight: "500",
-    fontFamily: "System",
+  },
+  datePicker: {
+    borderWidth: 1,
+    borderRadius: 6,
+    padding: 12,
+    marginBottom: 8,
+    backgroundColor: "#f9f9f9",
   },
 });

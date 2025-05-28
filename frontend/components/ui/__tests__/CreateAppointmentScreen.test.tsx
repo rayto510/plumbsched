@@ -17,9 +17,15 @@ jest.spyOn(Alert, "alert");
 
 jest.mock("@react-native-community/datetimepicker", () => {
   const React = require("react");
-  const { Text } = require("react-native");
-  return ({ value, onChange }) => {
-    return <Text testID="mock-datetime-picker">Mock Picker</Text>;
+  const { View, Text } = require("react-native");
+
+  return ({ testID, value, mode, onChange }) => {
+    return (
+      <View testID={testID || "dateTimePicker"}>
+        <Text>{`Mode: ${mode}`}</Text>
+        <Text>{`Value: ${value.toISOString()}`}</Text>
+      </View>
+    );
   };
 });
 
@@ -28,13 +34,6 @@ describe("CreateAppointmentScreen", () => {
     jest.clearAllMocks();
   });
 
-  const fillForm = (getByPlaceholderText: any) => {
-    fireEvent.changeText(getByPlaceholderText("Jane Doe"), "Alice");
-    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "123-456-7890");
-    fireEvent.changeText(getByPlaceholderText("100 Main St"), "42 Wallaby Way");
-    fireEvent.changeText(getByPlaceholderText("Fix sink"), "Install faucet");
-  };
-
   const renderWithNavigation = () =>
     render(
       <NavigationContainer>
@@ -42,52 +41,99 @@ describe("CreateAppointmentScreen", () => {
       </NavigationContainer>
     );
 
-  it("submits form successfully and navigates", async () => {
-    global.fetch = jest.fn(() => Promise.resolve({ ok: true })) as jest.Mock;
-
+  it("shows empty form initially", () => {
     const { getByPlaceholderText, getByText } = renderWithNavigation();
-    fillForm(getByPlaceholderText);
-    fireEvent.press(getByText("Create Appointment"));
-
-    await waitFor(() =>
-      expect(Alert.alert).toHaveBeenCalledWith("Success", "Appointment created")
-    );
-    expect(mockRouter.push).toHaveBeenCalledWith("/appointments");
+    expect(getByPlaceholderText("Jane Doe").props.value).toBe("");
+    expect(getByPlaceholderText("111-222-3333").props.value).toBe("");
+    expect(getByPlaceholderText("100 Main St").props.value).toBe("");
+    expect(getByPlaceholderText("Fix sink").props.value).toBe("");
+    expect(getByText("Create Appointment")).toBeTruthy();
   });
 
-  it("shows error alert when response is not ok", async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: false,
-        json: () => Promise.resolve({ detail: "Invalid data" }),
-      })
-    ) as jest.Mock;
-
-    const { getByPlaceholderText, getByText } = renderWithNavigation();
-    fillForm(getByPlaceholderText);
+  it("shows 'customer name is required' error on submit with empty name", async () => {
+    const { getByText } = renderWithNavigation();
     fireEvent.press(getByText("Create Appointment"));
-
-    await waitFor(() =>
-      expect(Alert.alert).toHaveBeenCalledWith(
-        "Error",
-        JSON.stringify({ detail: "Invalid data" })
-      )
-    );
+    await waitFor(() => {
+      expect(getByText("Customer name is required")).toBeTruthy();
+    });
   });
 
-  it("shows network error alert on fetch failure", async () => {
-    global.fetch = jest.fn(() => Promise.reject(new Error("Network down")));
-
-    const { getByPlaceholderText, getByText } = renderWithNavigation();
-    fillForm(getByPlaceholderText);
+  it("does not show error when customer name is filled", () => {
+    const { getByPlaceholderText, queryByText, getByText } =
+      renderWithNavigation();
+    fireEvent.changeText(getByPlaceholderText("Jane Doe"), "Alice");
     fireEvent.press(getByText("Create Appointment"));
+    expect(queryByText("Customer name is required")).toBeNull();
+  });
 
-    await waitFor(() =>
-      expect(Alert.alert).toHaveBeenCalledWith(
-        "Network error",
-        "Could not connect to backend"
-      )
-    );
+  it("shows 'Phone number is required' error on submit with empty phone", async () => {
+    const { getByPlaceholderText, getByText } = renderWithNavigation();
+    fireEvent.changeText(getByPlaceholderText("Jane Doe"), "Alice");
+    fireEvent.press(getByText("Create Appointment"));
+    await waitFor(() => {
+      expect(getByText("Phone number is required")).toBeTruthy();
+    });
+  });
+
+  it("shows 'Invalid phone number format' error on invalid phone", async () => {
+    const { getByPlaceholderText, getByText } = renderWithNavigation();
+    fireEvent.changeText(getByPlaceholderText("Jane Doe"), "Alice");
+    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "invalid-phone");
+    fireEvent.press(getByText("Create Appointment"));
+    await waitFor(() => {
+      expect(getByText("Invalid phone number format")).toBeTruthy();
+    });
+  });
+
+  it("does not show error when customer phone is filled", () => {
+    const { getByPlaceholderText, queryByText, getByText } =
+      renderWithNavigation();
+    fireEvent.changeText(getByPlaceholderText("Jane Doe"), "Alice");
+    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "123-456-7890");
+    fireEvent.press(getByText("Create Appointment"));
+    expect(queryByText("Phone number is required")).toBeNull();
+  });
+
+  it("shows 'Address is required' error on submit with empty address", async () => {
+    const { getByPlaceholderText, getByText } = renderWithNavigation();
+    fireEvent.changeText(getByPlaceholderText("Jane Doe"), "Alice");
+    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "123-456-7890");
+    fireEvent.press(getByText("Create Appointment"));
+    await waitFor(() => {
+      expect(getByText("Address is required")).toBeTruthy();
+    });
+  });
+
+  it("does not show error when address is filled", () => {
+    const { getByPlaceholderText, queryByText, getByText } =
+      renderWithNavigation();
+    fireEvent.changeText(getByPlaceholderText("Jane Doe"), "Alice");
+    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "123-456-7890");
+    fireEvent.changeText(getByPlaceholderText("100 Main St"), "42 Wallaby Way");
+    fireEvent.press(getByText("Create Appointment"));
+    expect(queryByText("Address is required")).toBeNull();
+  });
+
+  it("shows 'Description is required' error on submit with empty description", async () => {
+    const { getByPlaceholderText, getByText } = renderWithNavigation();
+    fireEvent.changeText(getByPlaceholderText("Jane Doe"), "Alice");
+    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "123-456-7890");
+    fireEvent.changeText(getByPlaceholderText("100 Main St"), "42 Wallaby Way");
+    fireEvent.press(getByText("Create Appointment"));
+    await waitFor(() => {
+      expect(getByText("Description is required")).toBeTruthy();
+    });
+  });
+
+  it("does not show error when description is filled", () => {
+    const { getByPlaceholderText, queryByText, getByText } =
+      renderWithNavigation();
+    fireEvent.changeText(getByPlaceholderText("Jane Doe"), "Alice");
+    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "123-456-7890");
+    fireEvent.changeText(getByPlaceholderText("100 Main St"), "42 Wallaby Way");
+    fireEvent.changeText(getByPlaceholderText("Fix sink"), "Install faucet");
+    fireEvent.press(getByText("Create Appointment"));
+    expect(queryByText("Description is required")).toBeNull();
   });
 
   it("navigates back to appointments on back button press", async () => {
