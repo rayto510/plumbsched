@@ -1,4 +1,3 @@
-import os
 """
 Django settings for backend project.
 
@@ -10,7 +9,8 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import dj_database_url
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -84,14 +84,11 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'yourdb'),
-        'USER': os.getenv('POSTGRES_USER', 'youruser'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'yourpassword'),
-        'HOST': os.getenv('POSTGRES_HOST', 'db'),  # 'db' matches your docker-compose service name
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
-    }
+    "default": dj_database_url.config(
+        default=os.getenv("DATABASE_URL"),
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
 
 
