@@ -1,5 +1,5 @@
 // frontend/utils/api/auth.ts
-import { BASE_URL } from "../config";
+import { API_BASE_URL } from "../config";
 
 export interface LoginResponse {
   access: string;
@@ -10,7 +10,7 @@ export async function login(
   username: string,
   password: string
 ): Promise<LoginResponse> {
-  const response = await fetch(`${BASE_URL}/auth/token/`, {
+  const response = await fetch(`${API_BASE_URL}/auth/token/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -27,7 +27,7 @@ export async function login(
 }
 
 export async function register(username: string, password: string) {
-  const response = await fetch(`${BASE_URL}/auth/register/`, {
+  const response = await fetch(`${API_BASE_URL}/auth/register/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
