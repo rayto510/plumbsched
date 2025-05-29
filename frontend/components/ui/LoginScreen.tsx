@@ -1,14 +1,16 @@
+import { login } from "@/utils/api/auth";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
+  Keyboard,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { login } from "@/utils/api/auth";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -34,48 +36,52 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome Back!</Text>
-      <Text style={styles.subtitle}>
-        Ready to manage your plumbing schedule easily? Log in to get started.
-      </Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-        autoCapitalize="none"
-        autoCorrect={false}
-        keyboardType="default"
-        returnKeyType="next"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        returnKeyType="done"
-        onSubmitEditing={handleLogin}
-      />
-      <TouchableOpacity
-        style={[styles.button, loading && styles.buttonDisabled]}
-        onPress={handleLogin}
-        disabled={loading}
-      >
-        <Text style={styles.buttonText}>
-          {loading ? "Logging in..." : "Log In"}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Welcome Back!</Text>
+        <Text style={styles.subtitle}>
+          Ready to manage your plumbing schedule easily? Log in to get started.
         </Text>
-      </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={() => router.push("/register")}
-        style={styles.registerLink}
-      >
-        <Text style={styles.registerText}>Don't have an account? Register</Text>
-      </TouchableOpacity>
-    </View>
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="default"
+          returnKeyType="next"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          returnKeyType="done"
+          onSubmitEditing={handleLogin}
+        />
+        <TouchableOpacity
+          style={[styles.button, loading && styles.buttonDisabled]}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? "Logging in..." : "Log In"}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => router.push("/register")}
+          style={styles.registerLink}
+        >
+          <Text style={styles.registerText}>
+            Don't have an account? Register
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 

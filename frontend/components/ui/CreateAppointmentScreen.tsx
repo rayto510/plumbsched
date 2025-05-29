@@ -6,12 +6,14 @@ import { useCallback, useState } from "react";
 import {
   Alert,
   Button,
+  Keyboard,
   Platform,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 
@@ -87,12 +89,11 @@ export default function CreateAppointmentScreen() {
       newErrors.customerName = "Customer name is required";
     }
 
+    const digitsOnlyPhone = customerPhone.replace(/\D/g, "");
     if (!customerPhone.trim()) {
       newErrors.customerPhone = "Phone number is required";
-    } else if (
-      !/^\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/.test(customerPhone.trim())
-    ) {
-      newErrors.customerPhone = "Invalid phone number format";
+    } else if (digitsOnlyPhone.length !== 10) {
+      newErrors.customerPhone = "Phone number must be exactly 10 digits";
     }
 
     if (!address.trim()) {
@@ -145,120 +146,143 @@ export default function CreateAppointmentScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => router.push("/appointments")}
-      >
-        <Text style={styles.backButtonText}>← Back to Appointments</Text>
-      </TouchableOpacity>
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.push("/appointments")}
+        >
+          <Text style={styles.backButtonText}>← Back to Appointments</Text>
+        </TouchableOpacity>
 
-      <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
-        New Appointment
-      </Text>
-
-      <Text style={{ marginBottom: 4 }}>Customer Name</Text>
-      <TextInput
-        value={customerName}
-        onChangeText={(text) => {
-          setCustomerName(text);
-          if (errors.customerName)
-            setErrors((e) => ({ ...e, customerName: undefined }));
-        }}
-        placeholder="Jane Doe"
-        style={[styles.input, errors.customerName && styles.inputError]}
-      />
-      {errors.customerName && (
-        <Text style={styles.errorText}>{errors.customerName}</Text>
-      )}
-
-      <Text style={{ marginBottom: 4 }}>Customer Phone</Text>
-      <TextInput
-        value={customerPhone}
-        onChangeText={(text) => {
-          setCustomerPhone(text);
-          if (errors.customerPhone)
-            setErrors((e) => ({ ...e, customerPhone: undefined }));
-        }}
-        placeholder="111-222-3333"
-        keyboardType="phone-pad"
-        style={[styles.input, errors.customerPhone && styles.inputError]}
-      />
-      {errors.customerPhone && (
-        <Text style={styles.errorText}>{errors.customerPhone}</Text>
-      )}
-
-      <Text style={{ marginBottom: 4 }}>Address</Text>
-      <TextInput
-        value={address}
-        onChangeText={(text) => {
-          setAddress(text);
-          if (errors.address) setErrors((e) => ({ ...e, address: undefined }));
-        }}
-        placeholder="100 Main St"
-        style={[styles.input, errors.address && styles.inputError]}
-      />
-      {errors.address && <Text style={styles.errorText}>{errors.address}</Text>}
-
-      <Text style={{ marginBottom: 4 }}>Description</Text>
-      <TextInput
-        value={description}
-        onChangeText={(text) => {
-          setDescription(text);
-          if (errors.description)
-            setErrors((e) => ({ ...e, description: undefined }));
-        }}
-        placeholder="Fix sink"
-        multiline
-        style={[
-          styles.input,
-          styles.textarea,
-          errors.description && styles.inputError,
-        ]}
-      />
-      {errors.description && (
-        <Text style={styles.errorText}>{errors.description}</Text>
-      )}
-
-      <Text style={{ marginBottom: 4 }}>Scheduled Date & Time</Text>
-
-      <Pressable
-        onPress={() => openPicker("date")}
-        style={[styles.datePicker, errors.scheduledDate && styles.inputError]}
-      >
-        <Text>{scheduledDate.toLocaleDateString()}</Text>
-      </Pressable>
-
-      <Pressable
-        onPress={() => openPicker("time")}
-        style={[styles.datePicker, errors.scheduledDate && styles.inputError]}
-      >
-        <Text>
-          {scheduledDate.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+        <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
+          New Appointment
         </Text>
-      </Pressable>
 
-      {errors.scheduledDate && (
-        <Text style={[styles.errorText, { marginBottom: 16 }]}>
-          {errors.scheduledDate}
-        </Text>
-      )}
-
-      {showPicker && (
-        <DateTimePicker
-          value={scheduledDate}
-          mode={pickerMode}
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={handleDateChange}
-          minimumDate={new Date()} // prevent selecting past date/time on iOS/Android
+        <Text style={{ marginBottom: 4 }}>Customer Name</Text>
+        <TextInput
+          value={customerName}
+          onChangeText={(text) => {
+            setCustomerName(text);
+            if (errors.customerName)
+              setErrors((e) => ({ ...e, customerName: undefined }));
+          }}
+          placeholder="Jane Doe"
+          style={[styles.input, errors.customerName && styles.inputError]}
         />
-      )}
+        {errors.customerName && (
+          <Text style={styles.errorText}>{errors.customerName}</Text>
+        )}
 
-      <Button title="Create Appointment" onPress={handleSubmit} />
-    </View>
+        <Text style={{ marginBottom: 4 }}>Customer Phone</Text>
+        <TextInput
+          value={customerPhone}
+          onChangeText={(text) => {
+            setCustomerPhone(text);
+            if (errors.customerPhone)
+              setErrors((e) => ({ ...e, customerPhone: undefined }));
+          }}
+          placeholder="111-222-3333"
+          keyboardType="phone-pad"
+          style={[styles.input, errors.customerPhone && styles.inputError]}
+        />
+        {errors.customerPhone && (
+          <Text style={styles.errorText}>{errors.customerPhone}</Text>
+        )}
+
+        <Text style={{ marginBottom: 4 }}>Address</Text>
+        <TextInput
+          value={address}
+          onChangeText={(text) => {
+            setAddress(text);
+            if (errors.address)
+              setErrors((e) => ({ ...e, address: undefined }));
+          }}
+          placeholder="100 Main St"
+          style={[styles.input, errors.address && styles.inputError]}
+        />
+        {errors.address && (
+          <Text style={styles.errorText}>{errors.address}</Text>
+        )}
+
+        <Text style={{ marginBottom: 4 }}>Description</Text>
+        <TextInput
+          value={description}
+          onChangeText={(text) => {
+            setDescription(text);
+            if (errors.description)
+              setErrors((e) => ({ ...e, description: undefined }));
+          }}
+          placeholder="Fix sink"
+          multiline
+          style={[
+            styles.input,
+            styles.textarea,
+            errors.description && styles.inputError,
+          ]}
+        />
+        {errors.description && (
+          <Text style={styles.errorText}>{errors.description}</Text>
+        )}
+
+        <Text style={{ marginBottom: 4 }}>Scheduled Date & Time</Text>
+
+        <Pressable
+          onPress={() => openPicker("date")}
+          style={[styles.datePicker, errors.scheduledDate && styles.inputError]}
+        >
+          <Text>{scheduledDate.toLocaleDateString()}</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => openPicker("time")}
+          style={[styles.datePicker, errors.scheduledDate && styles.inputError]}
+        >
+          <Text>
+            {scheduledDate.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </Text>
+        </Pressable>
+
+        {errors.scheduledDate && (
+          <Text style={[styles.errorText, { marginBottom: 16 }]}>
+            {errors.scheduledDate}
+          </Text>
+        )}
+
+        {showPicker && Platform.OS === "ios" && (
+          <View style={styles.iosPickerContainer}>
+            <View style={styles.iosPickerHeader}>
+              <TouchableOpacity onPress={() => setShowPicker(false)}>
+                <Text style={styles.doneText}>Done</Text>
+              </TouchableOpacity>
+            </View>
+            <DateTimePicker
+              value={scheduledDate}
+              mode={pickerMode}
+              display="spinner"
+              onChange={handleDateChange}
+              minimumDate={new Date()}
+              style={{ backgroundColor: "white" }}
+            />
+          </View>
+        )}
+
+        {showPicker && Platform.OS !== "ios" && (
+          <DateTimePicker
+            value={scheduledDate}
+            mode={pickerMode}
+            display="default"
+            onChange={handleDateChange}
+            minimumDate={new Date()}
+          />
+        )}
+
+        <Button title="Create Appointment" onPress={handleSubmit} />
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -314,5 +338,29 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 8,
     backgroundColor: "#f9f9f9",
+  },
+  iosPickerContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    padding: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  iosPickerHeader: {
+    alignItems: "flex-end",
+    padding: 10,
+  },
+  doneText: {
+    color: "#007aff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

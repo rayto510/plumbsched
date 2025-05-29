@@ -75,13 +75,13 @@ describe("CreateAppointmentScreen", () => {
     });
   });
 
-  it("shows 'Invalid phone number format' error on invalid phone", async () => {
+  it("shows 'Phone number must be exactly 10 digits' error on invalid phone", async () => {
     const { getByPlaceholderText, getByText } = renderWithNavigation();
     fireEvent.changeText(getByPlaceholderText("Jane Doe"), "Alice");
     fireEvent.changeText(getByPlaceholderText("111-222-3333"), "invalid-phone");
     fireEvent.press(getByText("Create Appointment"));
     await waitFor(() => {
-      expect(getByText("Invalid phone number format")).toBeTruthy();
+      expect(getByText("Phone number must be exactly 10 digits")).toBeTruthy();
     });
   });
 
@@ -89,7 +89,7 @@ describe("CreateAppointmentScreen", () => {
     const { getByPlaceholderText, queryByText, getByText } =
       renderWithNavigation();
     fireEvent.changeText(getByPlaceholderText("Jane Doe"), "Alice");
-    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "123-456-7890");
+    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "1234567890");
     fireEvent.press(getByText("Create Appointment"));
     expect(queryByText("Phone number is required")).toBeNull();
   });
@@ -97,7 +97,7 @@ describe("CreateAppointmentScreen", () => {
   it("shows 'Address is required' error on submit with empty address", async () => {
     const { getByPlaceholderText, getByText } = renderWithNavigation();
     fireEvent.changeText(getByPlaceholderText("Jane Doe"), "Alice");
-    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "123-456-7890");
+    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "1234567890");
     fireEvent.press(getByText("Create Appointment"));
     await waitFor(() => {
       expect(getByText("Address is required")).toBeTruthy();
@@ -108,7 +108,7 @@ describe("CreateAppointmentScreen", () => {
     const { getByPlaceholderText, queryByText, getByText } =
       renderWithNavigation();
     fireEvent.changeText(getByPlaceholderText("Jane Doe"), "Alice");
-    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "123-456-7890");
+    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "1234567890");
     fireEvent.changeText(getByPlaceholderText("100 Main St"), "42 Wallaby Way");
     fireEvent.press(getByText("Create Appointment"));
     expect(queryByText("Address is required")).toBeNull();
@@ -117,7 +117,7 @@ describe("CreateAppointmentScreen", () => {
   it("shows 'Description is required' error on submit with empty description", async () => {
     const { getByPlaceholderText, getByText } = renderWithNavigation();
     fireEvent.changeText(getByPlaceholderText("Jane Doe"), "Alice");
-    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "123-456-7890");
+    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "1234567890");
     fireEvent.changeText(getByPlaceholderText("100 Main St"), "42 Wallaby Way");
     fireEvent.press(getByText("Create Appointment"));
     await waitFor(() => {
@@ -129,7 +129,7 @@ describe("CreateAppointmentScreen", () => {
     const { getByPlaceholderText, queryByText, getByText } =
       renderWithNavigation();
     fireEvent.changeText(getByPlaceholderText("Jane Doe"), "Alice");
-    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "123-456-7890");
+    fireEvent.changeText(getByPlaceholderText("111-222-3333"), "1234567890");
     fireEvent.changeText(getByPlaceholderText("100 Main St"), "42 Wallaby Way");
     fireEvent.changeText(getByPlaceholderText("Fix sink"), "Install faucet");
     fireEvent.press(getByText("Create Appointment"));
